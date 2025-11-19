@@ -272,8 +272,7 @@
         <script type="text/javascript">
             var d = new Date(); // for now
             document.getElementById('entry.1725640105').valueAsDate = new Date();
-            document.getElementById('entry.980928198').setAttribute('value',`${d.getHours()}:${d.getMinutes()}`);
-
+            document.getElementById('entry.980928198').setAttribute('value',`${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`);
             document.getElementById('gform').addEventListener('submit', function(e) {
                 const textNode = document.createTextNode('Vaša žiadosť bola spracovaná 😉');
                 const imageNode = document.createElement('img');
