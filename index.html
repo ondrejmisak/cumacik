@@ -251,7 +251,7 @@
                 <div>
                     <label for="entry.1725640105" class="block text-sm/6 font-semibold text-black">Dátum konzultácie</label>
                     <div class="mt-2.5">
-                        <input type="date" id="entry.1725640105" name="entry.1725640105" value="2025-11-19" class="block w-full rounded-md bg-black/5 px-3.5 py-2 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"/>
+                        <input type="date" id="entry.1725640105" name="entry.1725640105" value="2025-11-18" class="block w-full rounded-md bg-black/5 px-3.5 py-2 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"/>
                     </div>
                 </div>
                 
@@ -270,6 +270,10 @@
         <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) {}"></iframe>
         
         <script type="text/javascript">
+            var d = new Date(); // for now
+            document.getElementById('entry.1725640105').valueAsDate = new Date();
+            document.getElementById('entry.980928198').setAttribute('value',`${d.getHours()}:${d.getMinutes()}`);
+
             document.getElementById('gform').addEventListener('submit', function(e) {
                 const textNode = document.createTextNode('Vaša žiadosť bola spracovaná 😉');
                 const imageNode = document.createElement('img');
