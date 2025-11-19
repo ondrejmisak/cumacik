@@ -226,8 +226,9 @@
     <section id="naplanovat-konzultaciu" class="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
         <h3 class="text-4xl font-bold text-center mb-16 text-gray-800">Naplánujte si konzultáciu</h3>
         <script type="text/javascript">var submitted=false;</script>
-        <form name="gform" id="gform" enctype="text/plain" action="https://docs.google.com/forms/d/e/1FAIpQLSdry4fIu9vc1U5Onyvqu4FMglYF5SyFkT7_3FsvnqJ1M75Rdg/formResponse?" target="hidden_iframe" onsubmit="submitted=true;" class="mx-auto mt-16 max-w-xl sm:mt-20 bg-white p-8 rounded-2xl shadow-lg hover-lift animate-fadeInUp">
-            <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+        <!-- action="https://docs.google.com/forms/d/e/1FAIpQLSdry4fIu9vc1U5Onyvqu4FMglYF5SyFkT7_3FsvnqJ1M75Rdg/formResponse?" -->
+        <form name="gform" id="gform" enctype="text/plain"  target="hidden_iframe" onsubmit="submitted=true;" class="mx-auto mt-16 max-w-xl sm:mt-20 bg-white p-8 rounded-2xl shadow-lg hover-lift animate-fadeInUp">
+            <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2" data-name="form">
                 <div>
                     <label for="entry.460455805" class="block text-sm/6 font-semibold text-black">Meno</label>
                     <div class="mt-2.5">
@@ -256,7 +257,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-10">
+            <div class="mt-10" data-name="form">
                 <button type="submit" class="border-2 border-black text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-black hover:text-blue-600 transition-all duration-300">Odoslať</button>
             </div>
         </form>
@@ -265,8 +266,11 @@
         <script type="text/javascript">
             document.getElementById('gform').addEventListener('submit', function(e) {
                 const textNode = document.createTextNode('Vaša žiadosť bola spracovaná 😉');
+                const imageNode = document.createElement('img');
+                imageNode.src = 'assets/images/IMG_8029.png';
+                this.insertBefore(imageNode, this.firstChild);
                 this.insertBefore(textNode, this.firstChild);
-                const children = this.querySelectorAll('*');
+                const children = this.querySelectorAll('[data-name="form"]');
                 children.forEach(child => {
                     child.style.transition = 'opacity 2s';
                     child.style.opacity = '0';
