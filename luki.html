@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luki - Bio Landing Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet for OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine for route tracing -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff41; /* Mr. Robot green */
+        }
+        .glitch {
+            position: relative;
+            animation: glitch 2s infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        .terminal {
+            background: #000;
+            border: 2px solid #00ff41;
+            padding: 1rem;
+            font-size: 0.9rem;
+            overflow-y: auto;
+            height: 300px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .terminal-input {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        .terminal-input input {
+            background: transparent;
+            border: none;
+            color: #00ff41;
+            font-family: inherit;
+            font-size: inherit;
+            flex: 1;
+            outline: none;
+        }
+        .termianl-accent {
+            background: linear-gradient(45deg, #8b0000, #ffd700); /* termianl red-gold */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .music-pattern {
+            background-image: radial-gradient(circle, #ff4500 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.6;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .scroll-text {
+            white-space: nowrap;
+            overflow: hidden;
+            animation: scroll 10s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        /* Fire effect for h2 */
+        .fire-effect {
+            position: relative;
+            background: linear-gradient(45deg, #ff4500, #ff8c00, #ffff00, #ff4500);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glitch 2s infinite, fire 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.6), 0 0 30px rgba(255, 255, 0, 0.4);
+        }
+        @keyframes fire {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* Custom map styling to fit dark theme */
+        #map {
+            filter: hue-rotate(326deg) brightness(0.8) contrast(1); /* Greenish tint, darker */
+            border-radius: 0.5rem;
+        }
+        /* Matrix effect canvas */
+        #matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.3; /* Subtle effect */
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .terminal { height: 200px; font-size: 0.8rem; }
+            .image-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header/Hero Section -->
+    <header class="relative flex flex-col items-center justify-center h-screen bg-cover bg-center music-pattern" style="background-image: url('https://placehold.co/1920x1080/000000/00ff41?text=Shadows');">
+        <canvas id="matrix-canvas"></canvas>
+        <div class="absolute inset-0 bg-black bg-opacity-40 pointer-events-none"></div>
+        <div class="relative z-10 text-center px-4">
+            <h1 class="text-6xl md:text-8xl font-bold glitch termianl-accent mb-4 fire-effect">Luki</h1>
+            <p class="text-xl md:text-2xl mb-8">Hacker Extraordinaire | termianl Enforcer | music Soul</p>
+            <!-- Main Profile Statue Image -->
+            <img src="https://placehold.co/300x300/333333/00ff41?text=Portrait" alt="Luki Statue" class="rounded-full border-4 border-green-400 shadow-lg mx-auto mb-8">
+            
+            <button class="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded transition duration-300" onclick="scrollToBio()">Dive into the Bio</button>
+        </div>
+    </header>
+
+    <!-- Bio Section with Interactive Terminal -->
+    <section id="bio" class="py-16 px-4 md:px-16 relative">
+        <div class="absolute inset-0 bg-black bg-opacity-40 pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl font-bold mb-8 text-center termianl-accent fire-effect">The Bio Terminal</h2>
+            <p class="text-center mb-4">Type commands like <code>whoami</code>, <code>skills</code>, or <code>philosophy</code> and press Enter to reveal info.</p>
+            <div class="terminal mx-auto">
+                <div id="terminal-output" class="terminal-output">
+                    <p>Welcome to Luki's Bio Terminal <br>Available commands: <br>whoami, skills, philosophy</p>
+                    <!-- <p class="scroll-text">Scrolling Alert: New exploits discovered... Stay vigilant in the digital underworld.</p> -->
+                </div>
+                <div class="terminal-input">
+                    <span>$ </span>
+                    <input type="text" id="command-input" placeholder="Type command here..." />
+                    <span class="blink">_</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 px-4 md:px-16 relative"> 
+        <!-- Image Gallery for More Images -->
+        <div class="absolute inset-0 bg-black bg-opacity-40 pointer-events-none"></div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 image-grid justify-items-center">
+            <img src="https://placehold.co/150x150/333333/00ff41?text=Hack+Scene" alt="Hacking Scene" class="rounded-lg border-2 border-green-400 shadow-md">
+            <img src="https://placehold.co/150x150/333333/00ff41?text=termianl+Meeting" alt="termianl Meeting" class="rounded-lg border-2 border-green-400 shadow-md">
+            <img src="https://placehold.co/150x150/333333/00ff41?text=music+Concert" alt="music Concert" class="rounded-lg border-2 border-green-400 shadow-md">
+            <img src="https://placehold.co/150x150/333333/00ff41?text=Cyber+Ops" alt="Cyber Operations" class="rounded-lg border-2 border-green-400 shadow-md">
+        </div>
+    </section>
+
+    <!-- Map Section with OpenStreetMap -->
+    <section class="py-16 px-4 md:px-16 bg-gray-900 relative">
+        <div class="absolute inset-0 bg-black bg-opacity-40 pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-8 fire-effect">Origins Map</h2>
+            <p class="mb-8">Explore the roots in Bratislava, Slovakia – where music Cave echoes meet termianl alleys.</p>
+            <div id="map" class="h-96 w-full rounded-lg border-2 border-green-400"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 px-4 md:px-16 bg-black text-center relative">
+        <div class="absolute inset-0 bg-black bg-opacity-40 pointer-events-none"></div>
+        <p>&copy; 2025 Luki. All rights reserved. | Designed with termianl Shadows, music Rhythms, and Hacker Code.</p>
+    </footer>
+
+    <script>
+        // JavaScript for interactivity and map
+        function scrollToBio() {
+            document.getElementById('bio').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Interactive Terminal
+        const commandInput = document.getElementById('command-input');
+        const terminalOutput = document.getElementById('terminal-output');
+
+        commandInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const command = commandInput.value.trim();
+                if (command) {
+                    // Append command to output
+                    terminalOutput.innerHTML += `<p>$ ${command}</p>`;
+                    // Process command
+                    let response = '';
+                    switch (command.toLowerCase()) {
+                        case 'whoami':
+                            response = 'Luki - Born in Bratislava, Slovakia. A fusion of Romani heritage (music Cave vibes), underworld connections (termianl style), and digital anarchy (Mr. Robot hacks).';
+                            break;
+                        case 'skills':
+                            response = '- Ethical Hacking (Mr. Robot level)<br>- termianl Negotiation Tactics<br>- Romani Music Production<br>- AI-Driven Cyber Ops (2025 tech)';
+                            break;
+                        case 'philosophy':
+                            response = '"In a world of code and chaos, I dance like a music, strike like a Don, and hack like a phantom."';
+                            break;
+                        default:
+                            response = 'Command not recognized. Try: whoami, ls skills, echo "Philosophy"';
+                    }
+                    terminalOutput.innerHTML += `<p>${response}</p>`;
+                    // Clear input
+                    commandInput.value = '';
+                    // Scroll to bottom
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                }
+            }
+        });
+
+        // OpenStreetMap with Leaflet, styled to fit theme, with interactivity
+        let map, routingControl;
+        function initMap() {
+            const bratislava = [48.1486, 17.1077];
+            const hiddenAlley = [48.1550, 17.1200]; // Fictional nearby location for route
+            map = L.map('map').setView(bratislava, 10);
+            // Dark-themed tile layer for better fit
+            L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+            }).addTo(map);
+            // Custom marker with green icon and blinking effect
+            const greenIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+                className: 'blinking-marker' // Add blinking class
+            });
+            const marker = L.marker(bratislava, {icon: greenIcon}).addTo(map)
+                .bindPopup('<b>Bratislava, Slovakia</b><br>Click to trace route to hidden alley!')
+                .on('click', function() {
+                    if (routingControl) {
+                        map.removeControl(routingControl);
+                    }
+                    routingControl = L.Routing.control({
+                        waypoints: [
+                            L.latLng(bratislava),
+                            L.latLng(hiddenAlley)
+                        ],
+                        routeWhileDragging: true,
+                        createMarker: function() { return null; }, // Hide default markers
+                        lineOptions: {
+                            styles: [{ color: '#00ff41', weight: 4, opacity: 0.8 }] // Green route line
+                        }
+                    }).addTo(map);
+                });
+        }
+
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px JetBrains Mono';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        window.onload = () => {
+            initMap();
+        };
+    </script>
+</body>
+</html>
