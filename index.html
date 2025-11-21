@@ -61,6 +61,28 @@
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
+
+        .heartbeat-element {
+            animation: heartbeat 1s infinite ease-in-out;
+            }
+        @keyframes heartbeat {
+            0% {
+                transform: scale(1.00);
+            }
+            25% {
+                transform: scale(1.1);
+            }
+            50% {
+                transform: scale(1.00);
+            }
+            75% {
+                transform: scale(1.04);
+            }
+            100% {
+                transform: scale(1.00);
+            }
+        }
+
     </style>
 </head>
 
@@ -114,10 +136,10 @@
                         vedieť viac</a>
                 </div>
             </div>
-            <div class="md:w-1/2 mt-10 md:mt-0 animate-fadeInUp" style="animation-delay: 0.3s;">
+            <div class="md:w-1/2 mt-10 md:mt-0 animate-fadeInUp heartbeat-element" style="animation-delay: 0.3s;">
                 <!-- shadow-2xl -->
                 <img src="../assets/images/IMG_8028-1.png" alt="Hero Photo"
-                    class="mx-auto rounded-2xl hover:scale-105 transition-transform duration-300 max-w-sm">
+                    class="mx-auto rounded-2xl hover:scale-105 transition-transform duration-300 max-w-sm heartbeat-element">
             </div>
         </div>
     </section>
